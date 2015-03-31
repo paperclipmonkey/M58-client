@@ -9,11 +9,12 @@ import java.io.*;
 import java.net.*;
 import javax.swing.*;
 import java.awt.event.*;
+import javax.swing.text.DefaultCaret;
 import javax.xml.ws.WebServiceRef;
 import uk.co.threeequals.webchat.Message;
 
 public class AppChatClientUI {
-    @WebServiceRef(wsdlLocation = "http://michaels-mbp:8080/WebApplication1/NewWebService?wsdl")    
+    @WebServiceRef(wsdlLocation = "http://localhost:8080/ChatServer/ChatSvr?wsdl")    
     private static final int HOR_SIZE = 400;
     private static final int VER_SIZE = 200;
     private static final int VER_SIZE_TYPING = 75;
@@ -34,6 +35,10 @@ public class AppChatClientUI {
         
         /* - - - - - - Returned messages pane - - - - - - - - - */
         otherText = new JTextArea();
+        
+        DefaultCaret caret = (DefaultCaret) otherText.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE); 
+        
         otherTextScroll = new JScrollPane(otherText);
         otherText.setBackground(new java.awt.Color(200, 200, 200));
         otherTextScroll.setHorizontalScrollBarPolicy(
