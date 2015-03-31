@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI (http://jax-ws.java.net). RI's version is Metro/2.3.1-b419 (branches/2.3.1.x-7937; 2014-08-04T08:11:03+0000) JAXWS-RI/2.2.10-b140803.1500 JAXWS-API/2.2.11 JAXB-RI/2.2.10-b140802.1033 JAXB-API/2.2.12-b140109.1041 svn-revision#unknown. --><xs:schema xmlns:tns="http://ChatServer/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://ChatServer/">
+
+<xs:element name="getMessage" type="tns:getMessage"/>
+
+<xs:element name="getMessageResponse" type="tns:getMessageResponse"/>
+
+<xs:element name="join" type="tns:join"/>
+
+<xs:element name="joinResponse" type="tns:joinResponse"/>
+
+<xs:element name="sendMessage" type="tns:sendMessage"/>
+
+<xs:element name="sendMessageResponse" type="tns:sendMessageResponse"/>
+
+<xs:complexType name="join">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="joinResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="sendMessage">
+<xs:sequence>
+<xs:element name="messageStr" type="xs:string" minOccurs="0"/>
+<xs:element name="uuid" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="sendMessageResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:boolean" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getMessage">
+<xs:sequence>
+<xs:element name="uuid" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getMessageResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:message" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="message">
+<xs:sequence>
+<xs:element name="to" type="xs:string" minOccurs="0"/>
+<xs:element name="from" type="xs:string" minOccurs="0"/>
+<xs:element name="ts" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="body" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>
