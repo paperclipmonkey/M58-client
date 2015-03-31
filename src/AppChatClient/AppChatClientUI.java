@@ -1,18 +1,19 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * @author Michael Waterworth
+ * Adapted from code written by Neal Harman
  */
 package AppChatClient;
 
 import java.io.*;
-import java.net.*;
 import javax.swing.*;
 import java.awt.event.*;
 import javax.swing.text.DefaultCaret;
 import javax.xml.ws.WebServiceRef;
-import uk.co.threeequals.webchat.Message;
 
+/**
+ * UI for client connecting to AppChat Server
+ * @author michaelwaterworth
+ */
 public class AppChatClientUI {
     @WebServiceRef(wsdlLocation = "http://localhost:8080/ChatServer/ChatSvr?wsdl")    
     private static final int HOR_SIZE = 400;
@@ -26,17 +27,20 @@ public class AppChatClientUI {
     private JScrollPane myTextScroll;
     private JScrollPane otherTextScroll;
     private static TextThread otherTextThread;
-    private static ObjectOutputStream out;
     private ChatSvr port;
-    private String uuid;
+    private String uuid;//Unique User ID - based on UUID v4
 
 
+    /**
+     * Initialize UI components
+     */
     private void initComponents() {
     	frame = new JFrame(TITLE);
         
         /* - - - - - - Returned messages pane - - - - - - - - - */
         otherText = new JTextArea();
         
+        // Set to continue to scroll as new messages come in
         DefaultCaret caret = (DefaultCaret) otherText.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE); 
         
@@ -55,10 +59,10 @@ public class AppChatClientUI {
         otherText.setEditable(false);
                
         frame.getContentPane().add(otherTextScroll,
-            java.awt.BorderLayout.NORTH);
+            java.awt.BorderLayout.NORTH);//Push to the top
         
         
-        /* - - - - - - Typed messages pane - - - - - - - - - */
+        /* - - - - - - Message entry pane - - - - - - - - - */
         myText = new JTextArea();
         myTextScroll = new JScrollPane(myText);			
         myTextScroll.setHorizontalScrollBarPolicy(
@@ -78,23 +82,14 @@ public class AppChatClientUI {
             }
         });
         frame.getContentPane().add(myTextScroll, java.awt.BorderLayout.SOUTH);
-            
-        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
     }
     
-    public void showMessage(AppChatClient.Message m){
-        Message cnvr;
-        cnvr = new Message(
-                m.body,
-                m.to,
-                m.from
-        );
-        showMessage(cnvr);
-    }
-    
-    
+    /**
+     * Show a message in the UI
+     * @param m 
+     */
     public void showMessage(Message m){
         String apMesStr = "";
         
@@ -111,7 +106,10 @@ public class AppChatClientUI {
         otherText.append(apMesStr);
     }
     
-    private void initConnection(String host){
+    /**
+     * Set up initial connection with endpoint
+     */
+    private void initConnection(){
         try {
             ChatSvr_Service service = new ChatSvr_Service();
             port = service.getChatSvrPort();
@@ -127,24 +125,34 @@ public class AppChatClientUI {
             
         } catch (Exception ex) {
             System.out.println(ex.toString());
-            showMessage(new Message("Failed to connect to server"));
+            AppChatClient.Message k = new Message();
+            k.setBody("Failed to connect to server");
+            showMessage(k);
         }
             
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                  try {
-                      out.writeObject(new Message("Exiting"));
-                  }
-                  catch (Exception ex) {
-                      showMessage(new Message("Exit failed"));
-                  }
-                  System.exit(0);
+                try {
+                    Message k = new AppChatClient.Message();
+                    k.setBody("Exiting");
+                    showMessage(k);
+                }
+                catch (Exception ex) {
+                    Message k = new AppChatClient.Message();
+                    k.setBody("Exit failed");
+                    showMessage(k);
+                }
+                System.exit(0);
             }
         });
     }
 
+    /**
+     * Event handler for keypress. Wait for /n character and then send string off to remote
+     * @param evt Keyevent that triggered event
+     */
     private void textTyped(java.awt.event.KeyEvent evt) {
         char c = evt.getKeyChar();
         if (c == '\n'){
@@ -155,32 +163,35 @@ public class AppChatClientUI {
             typed = typed.replace("\n", "");
             //Don't send empty strings
             if(typed != null && !typed.isEmpty()){
-                Message m;
-                m = new Message(typed, null, "Me");
+                AppChatClient.Message m = new Message();
+                m.setBody(typed);
+                m.setFrom("Me");
                 showMessage(m);
                 port.sendMessage(typed, uuid);
             }
         }
     }
     
-    
+    /**
+     * Main for application
+     * @param args - Empty
+     */
     public static void main(String[] args) {
-    	if (args.length < 1) {
-            System.out.println("Usage: AppChatClient host");
-            return;
-    	}
-    	final String host = args[0];
     	javax.swing.SwingUtilities.invokeLater(new Runnable() {
             AppChatClientUI client = new AppChatClientUI();
             @Override
             public void run() {
                 client.initComponents();
-                client.initConnection(host);
+                client.initConnection();
             }
     	});
     }
 }
 
+/**
+ * Thread to get new text from remote
+ * @author michaelwaterworth
+ */
 class TextThread extends Thread {
 
     ObjectInputStream in;
@@ -194,18 +205,24 @@ class TextThread extends Thread {
         uuid = myUuid;
     }
     
+    /**
+     * Run method for thread
+     */
     @Override
     public void run() {
         try {
             while(true){
-                AppChatClient.Message m = chatSvr.getMessage(uuid);
+                Message m = chatSvr.getMessage(uuid);
                 if(m!=null){
                     client.showMessage(m);
                 }
                 sleep(100);
             }
         } catch (Exception e) {
-                client.showMessage(new Message("Error reading from server"));
+                Message m = new Message();
+                m.setBody("Error reading from server");
+                m.setFrom("Me");
+                client.showMessage(m);
         }
     }
 }
