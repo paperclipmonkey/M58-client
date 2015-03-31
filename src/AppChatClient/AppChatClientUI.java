@@ -151,17 +151,15 @@ public class AppChatClientUI {
             JTextArea jta = (JTextArea) evt.getComponent();
             String typed = jta.getText();
             jta.setText(null);
-
-            Message m;
-            m = new Message(typed.replace("\n", ""), null, "Me");
-
-            showMessage(m);
-
-            uk.co.threeequals.webservice.Message message = new uk.co.threeequals.webservice.Message();
-            message.setBody("My body");
-            message.setFrom("Me");
-            String results = port.sendMessage(message);
-            System.out.println("Result = " + results);        
+            
+            typed = typed.replace("\n", "");
+            //Don't send empty strings
+            if(typed != null && !typed.isEmpty()){
+                Message m;
+                m = new Message(typed, null, "Me");
+                showMessage(m);
+                port.sendMessage(typed, uuid);
+            }
         }
     }
     
@@ -180,7 +178,6 @@ public class AppChatClientUI {
                 client.initConnection(host);
             }
     	});
-    	
     }
 }
 
@@ -188,29 +185,28 @@ class TextThread extends Thread {
 
     ObjectInputStream in;
     AppChatClientUI client;
-    Socket socket;
-
-    TextThread(AppChatClientUI clientC, Socket mySocket) throws IOException{
+    ChatSvr chatSvr;
+    String uuid;
+    
+    TextThread(AppChatClientUI clientC, ChatSvr myChatSvr, String myUuid) throws IOException{
         client = clientC;
-        socket = mySocket;
+        chatSvr = myChatSvr;
+        uuid = myUuid;
     }
     
     @Override
     public void run() {
-        try {    	
-            in = new ObjectInputStream(socket.getInputStream());
-            while (true) {
-                Object message = in.readObject();
-                if ((message == null) || (!(message instanceof Message))){
-                    client.showMessage(new Message("Error reading from server"));
-                    return;
+        try {
+            while(true){
+                AppChatClient.Message m = chatSvr.getMessage(uuid);
+                if(m!=null){
+                    client.showMessage(m);
                 }
-                Message m = (Message)message;
-                client.showMessage(new Message(m.body));
+                sleep(100);
             }
-        }
-        catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
                 client.showMessage(new Message("Error reading from server"));
         }
     }
 }
+
