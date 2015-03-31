@@ -84,13 +84,25 @@ public class AppChatClientUI {
         frame.setVisible(true);
     }
     
+    public void showMessage(AppChatClient.Message m){
+        Message cnvr;
+        cnvr = new Message(
+                m.body,
+                m.to,
+                m.from
+        );
+        showMessage(cnvr);
+    }
+    
+    
     public void showMessage(Message m){
         String apMesStr = "";
         
-        if(m.to != null){
+        if(m.to != null && !"".equals(m.to)){
             apMesStr = apMesStr + "Private message from ";
         }
-        if(m.from == null){
+        
+        if(m.from == null || "".equals(m.from)){
             m.from = "System";
         }
         
