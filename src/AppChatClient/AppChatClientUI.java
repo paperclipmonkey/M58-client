@@ -27,7 +27,8 @@ public class AppChatClientUI {
     private JScrollPane otherTextScroll;
     private static TextThread otherTextThread;
     private static ObjectOutputStream out;
-    private uk.co.threeequals.webservice.NewWebService port;
+    private ChatSvr port;
+    private String uuid;
 
 
     private void initComponents() {
@@ -100,17 +101,24 @@ public class AppChatClientUI {
     
     private void initConnection(String host){
         try {
-            uk.co.threeequals.webservice.NewWebService_Service service = new uk.co.threeequals.webservice.NewWebService_Service();
-            port = service.getNewWebServicePort();
+            ChatSvr_Service service = new ChatSvr_Service();
+            port = service.getChatSvrPort();
+            
+            //Get 'session' string from server
+            uuid = port.join();
+            System.out.println("Connected with UUID: " + uuid);
+            
+            otherTextThread = new TextThread(this, port, uuid);
+//            OutputStream temp = mySocket.getOutputStream();
+//            out = new ObjectOutputStream(temp);
+            otherTextThread.start();
+            
         } catch (Exception ex) {
+            System.out.println(ex.toString());
             showMessage(new Message("Failed to connect to server"));
         }
             
-            //Socket mySocket = new Socket(host, 2048);
-//            otherTextThread = new TextThread(this, mySocket);
-//            OutputStream temp = mySocket.getOutputStream();
-//            out = new ObjectOutputStream(temp);
-//            otherTextThread.start();
+
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
