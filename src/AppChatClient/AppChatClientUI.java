@@ -17,6 +17,7 @@ public class AppChatClientUI {
     private static final int HOR_SIZE = 400;
     private static final int VER_SIZE = 200;
     private static final int VER_SIZE_TYPING = 75;
+    private static final String TITLE = "Chat Client";
     
     private JFrame frame;
     private JTextArea myText;
@@ -29,7 +30,7 @@ public class AppChatClientUI {
 
 
     private void initComponents() {
-    	frame = new JFrame("Chat Client");
+    	frame = new JFrame(TITLE);
         
         /* - - - - - - Returned messages pane - - - - - - - - - */
         otherText = new JTextArea();
