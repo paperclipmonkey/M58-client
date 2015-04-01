@@ -93,16 +93,21 @@ public class AppChatClientUI {
     public void showMessage(Message m){
         String apMesStr = "";
         
+        //If is private message
         if(m.to != null && !"".equals(m.to)){
             apMesStr = apMesStr + "Private message from ";
         }
         
+        //If is system message
         if(m.from == null || "".equals(m.from)){
             m.from = "System";
         }
         
+        //Append String together
         apMesStr = apMesStr + m.from + ": ";
         apMesStr = apMesStr + m.body + "\n";
+        
+        //Display message in UI
         otherText.append(apMesStr);
     }
     
@@ -119,8 +124,6 @@ public class AppChatClientUI {
             System.out.println("Connected with UUID: " + uuid);
             
             otherTextThread = new TextThread(this, port, uuid);
-//            OutputStream temp = mySocket.getOutputStream();
-//            out = new ObjectOutputStream(temp);
             otherTextThread.start();
             
         } catch (Exception ex) {
